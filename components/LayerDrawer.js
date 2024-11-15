@@ -20,7 +20,7 @@ export default function LayerDrawer({ isOpen, onClose }) {
         initial={{ x: "100%" }}
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
-        transition={{ type: "spring", damping: 30 }}
+        transition={{ type: "spring", damping: 20 }}
         className="fixed right-0 top-0 h-full w-full bg-white z-50 p-6"
       >
         <button 
