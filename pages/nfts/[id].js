@@ -1,8 +1,12 @@
 import { motion } from "framer-motion";
 import { ArrowLeft, Heart, Share2, Clock, Tag, Shield } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+import LayerDrawer from "../../components/LayerDrawer";
 
 export default function NftDetail() {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  
   // This would normally come from an API or props
   const nftData = {
     id: 1,
@@ -58,7 +62,7 @@ export default function NftDetail() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <div className="relative aspect-square rounded-2xl overflow-hidden shadow-2xl">
+          <div className="relative aspect-square rounded-2xl overflow-hidden shadow-lg max-w-[500px] mx-auto">
             <img src={nftData.image} alt={nftData.name} className="object-cover w-full h-full" />
           </div>
         </motion.div>
@@ -68,7 +72,7 @@ export default function NftDetail() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="space-y-8"
+          className="space-y-6"
         >
           {/* Title and Actions */}
           <div className="flex justify-between items-start">
@@ -87,20 +91,18 @@ export default function NftDetail() {
           </div>
 
           {/* Creator */}
-          <div className="grid grid-cols-2 gap-6">
-            <div className="p-4 border rounded-xl">
-              <p className="text-sm text-gray-500 mb-3">Creator</p>
-              <div className="flex items-center gap-3">
-                <img src={nftData.creator.avatar} alt={nftData.creator.name} 
-                     className="w-10 h-10 rounded-full" />
-                <span className="font-medium">{nftData.creator.name}</span>
-              </div>
+          <div className="flex items-center gap-4 p-4 border rounded-xl hover:border-black transition-colors">
+            <img src={nftData.creator.avatar} alt={nftData.creator.name} 
+                 className="w-12 h-12 rounded-full" />
+            <div>
+              <p className="text-sm text-gray-500">Creator</p>
+              <p className="font-medium">{nftData.creator.name}</p>
             </div>
           </div>
 
-          {/* Price and Action */}
-          <div className="p-6 border rounded-xl bg-gray-50">
-            <div className="flex items-center justify-between mb-4">
+          {/* Price and Actions */}
+          <div className="p-6 border rounded-xl">
+            <div className="flex items-center justify-between mb-6">
               <div>
                 <p className="text-sm text-gray-500">Current Price</p>
                 <p className="text-3xl font-bold">{nftData.price}</p>
@@ -110,9 +112,24 @@ export default function NftDetail() {
                 <p className="text-xl font-semibold">{nftData.remaining}</p>
               </div>
             </div>
-            <button className="w-full bg-indigo-600 text-white py-4 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-              Buy Now
+            <button 
+              onClick={() => setIsDrawerOpen(true)}
+              className="w-full text-sm text-gray-600 hover:text-black flex items-center gap-2 justify-center mb-4 border py-2 rounded-lg hover:border-black transition-all"
+            >
+              View layer hierarchy →
             </button>
+            <div className="flex gap-4">
+              <button 
+                onClick={() => setIsDrawerOpen(true)}
+                className="flex-1 bg-black text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-800 transition-colors flex flex-col items-center"
+              >
+                <span>Relayer</span>
+                <span className="text-sm text-gray-300">Show your creativity</span>
+              </button>
+              <button className="flex-1 bg-black text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-800 transition-colors">
+                Buy Now
+              </button>
+            </div>
           </div>
 
           {/* Description */}
@@ -135,6 +152,11 @@ export default function NftDetail() {
           </div>
         </motion.div>
       </div>
+
+      <LayerDrawer 
+        isOpen={isDrawerOpen} 
+        onClose={() => setIsDrawerOpen(false)} 
+      />
     </div>
   );
 }
