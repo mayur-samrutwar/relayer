@@ -1,103 +1,48 @@
 import { motion } from "framer-motion";
 import NftCard from "./NftCard";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export default function Hero() {
+  const floatingImages = [
+    '/nft.jpg', '/nft2.jpg', '/nft3.jpg'
+  ];
+
   return (
     <div className="flex items-center justify-between min-h-[calc(100vh-120px)] gap-20 px-4 overflow-hidden">
       {/* Left side content */}
       <div className="flex-1 relative">
-        {/* Floating background images */}
-        <motion.img
-          src="/nft.jpg"
-          alt=""
-          className="absolute w-24 h-24 rounded-lg opacity-20 -z-10"
-          initial={{ x: -100, y: -50 }}
-          animate={{ 
-            x: [-100, -80, -100],
-            y: [-50, -30, -50],
-          }}
-          transition={{ 
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.img
-          src="/nft.jpg"
-          alt=""
-          className="absolute w-20 h-20 rounded-lg opacity-15 -z-10 right-20 top-20"
-          initial={{ x: 100, y: 50 }}
-          animate={{ 
-            x: [100, 80, 100],
-            y: [50, 70, 50],
-          }}
-          transition={{ 
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.img
-          src="/nft.jpg"
-          alt=""
-          className="absolute w-16 h-16 rounded-lg opacity-10 -z-10 left-40 top-0"
-          initial={{ x: 0, y: 0 }}
-          animate={{ 
-            x: [0, 20, 0],
-            y: [0, -20, 0],
-          }}
-          transition={{ 
-            duration: 12,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.img
-          src="/nft.jpg"
-          alt=""
-          className="absolute w-32 h-32 rounded-lg opacity-10 -z-10 -left-20 bottom-20"
-          initial={{ x: -50, y: 50 }}
-          animate={{ 
-            x: [-50, -30, -50],
-            y: [50, 30, 50],
-          }}
-          transition={{ 
-            duration: 15,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.img
-          src="/nft.jpg"
-          alt=""
-          className="absolute w-28 h-28 rounded-lg opacity-15 -z-10 right-0 bottom-0"
-          initial={{ x: 50, y: 0 }}
-          animate={{ 
-            x: [50, 70, 50],
-            y: [0, 20, 0],
-          }}
-          transition={{ 
-            duration: 9,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.img
-          src="/nft.jpg"
-          alt=""
-          className="absolute w-20 h-20 rounded-lg opacity-20 -z-10 right-40 -bottom-10"
-          initial={{ x: 0, y: 50 }}
-          animate={{ 
-            x: [0, -20, 0],
-            y: [10, 30, 50],
-          }}
-          transition={{ 
-            duration: 11,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
+        {[...Array(24)].map((_, index) => (
+          <motion.img
+            key={index}
+            src={floatingImages[index % floatingImages.length]}
+            alt=""
+            className={`absolute w-8 h-8 rounded-lg opacity-[0.15] -z-10`}
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              transform: `scale(${Math.random() * 0.5 + 0.5})`,
+            }}
+            initial={{ x: Math.random() * 50 - 25, y: Math.random() * 50 - 25 }}
+            animate={{ 
+              x: [
+                Math.random() * 50 - 25,
+                Math.random() * 50 - 25,
+                Math.random() * 50 - 25
+              ],
+              y: [
+                Math.random() * 50 - 25,
+                Math.random() * 50 - 25,
+                Math.random() * 50 - 25
+              ],
+            }}
+            transition={{ 
+              duration: Math.random() * 10 + 15,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+          />
+        ))}
 
         <motion.h1 
           className="text-7xl font-black leading-tight mb-6"
@@ -115,6 +60,7 @@ export default function Hero() {
         >
           NFT marketplace for the one who dares to experiments.
         </motion.p>
+        <Link href="/market">
         <motion.button
           className="bg-black text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-colors flex items-center"
           initial={{ opacity: 0, y: 20 }}
@@ -124,6 +70,7 @@ export default function Hero() {
           Go to marketplace
           <ArrowRight className="ml-2" />
         </motion.button>
+        </Link>
       </div>
 
       {/* Right side NFT cards */}
@@ -139,29 +86,32 @@ export default function Hero() {
           
           {/* Back card */}
           <motion.div
-            className="absolute origin-bottom-left"
+            className="absolute origin-bottom-left cursor-pointer"
             initial={{ rotate: 0, x: 0 }}
             animate={{ rotate: -15, x: -20 }}
+            whileHover={{ scale: 1.05, zIndex: 10 }}
             transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
           >
-            <NftCard image="/nft.jpg" />
+            <NftCard image="/nft3.jpg" />
           </motion.div>
 
           {/* Middle card */}
           <motion.div
-            className="absolute origin-bottom-left"
+            className="absolute origin-bottom-left cursor-pointer"
             initial={{ rotate: 0 }}
             animate={{ rotate: 0 }}
+            whileHover={{ scale: 1.05, zIndex: 10 }}
             transition={{ duration: 0.8 }}
           >
-            <NftCard />
+            <NftCard image="/nft2.jpg" />
           </motion.div>
 
           {/* Front card */}
           <motion.div
-            className="absolute origin-bottom-left"
+            className="absolute origin-bottom-left cursor-pointer"
             initial={{ rotate: 0, x: 0 }}
             animate={{ rotate: 15, x: 20 }}
+            whileHover={{ scale: 1.05, zIndex: 10 }}
             transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
           >
             <NftCard image="/nft.jpg" />
