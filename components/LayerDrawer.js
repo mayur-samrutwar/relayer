@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import { motion } from "framer-motion";
+import Stream from "./Stream";
 
 export default function LayerDrawer({ isOpen, onClose }) {
   if (!isOpen) return null;
@@ -30,7 +31,7 @@ export default function LayerDrawer({ isOpen, onClose }) {
           <X size={24} />
         </button>
         
-        <h2 className="text-2xl font-bold mt-4">Layer Information</h2>
+        <Stream />
       </motion.div>
     </>
   );
