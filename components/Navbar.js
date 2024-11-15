@@ -17,9 +17,15 @@ export default function Navbar() {
         />
         </Link>
       </div>
-      <div className="flex-grow text-center">
+      <div className="flex-grow text-center space-x-8">
+      <Link href="/create" className="text-lg text-gray-700 hover:text-gray-900">
+          Create
+        </Link>
         <Link href="/market" className="text-lg text-gray-700 hover:text-gray-900">
           Marketplace
+        </Link>
+        <Link href="/profile" className="text-lg text-gray-700 hover:text-gray-900">
+          Profile
         </Link>
       </div>
       <DynamicWidget />
