@@ -9,7 +9,7 @@ export default function Hero() {
   ];
 
   return (
-    <div className="flex items-center justify-between min-h-[calc(100vh-120px)] gap-20 px-4 overflow-hidden">
+    <div className="flex items-center justify-between gap-20 my-10 px-4 overflow-hidden">
       {/* Left side content */}
       <div className="flex-1 relative">
         {[...Array(24)].map((_, index) => (
@@ -62,14 +62,10 @@ export default function Hero() {
         </motion.p>
         <Link href="/market">
         <motion.button
-          className="bg-indigo-700 text-white px-8 py-4 rounded-lg hover:bg-indigo-800 transition-colors flex items-center shadow-[5px_5px_rgba(0,_0,_128,_0.4),_10px_10px_rgba(0,_0,_128,_0.3),_15px_15px_rgba(0,_0,_128,_0.2),_20px_20px_rgba(0,_0,_128,_0.1)]"
+          className="bg-indigo-700 text-white px-8 py-4 rounded-lg hover:bg-indigo-800 transition-colors flex items-center "
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          whileHover={{
-            boxShadow: "0px 0px rgba(0, 0, 128, 0)",
-            transition: { duration: 0.3, ease: "easeInOut" }
-          }}
         >
           Go to marketplace
           <ArrowRight className="ml-2" />
@@ -79,15 +75,13 @@ export default function Hero() {
       </div>
 
       {/* Right side NFT cards */}
-      <div className="flex-1 relative h-[500px] -mr-20">
+      <div className="flex-1 relative h-[500px] -mr-20 mt-20">
         <motion.div 
           className="absolute left-1/3 -translate-x-1/2"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6 }}
         >
-          {/* Shadow */}
-          <div className="absolute bottom-[-40px] left-1/2 -translate-x-1/2 w-[280px] h-[40px] bg-black/10 blur-xl rounded-full" />
           
           {/* Back card */}
           <motion.div
