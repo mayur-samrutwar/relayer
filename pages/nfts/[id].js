@@ -3,9 +3,11 @@ import { ArrowLeft, Heart, Share2, Clock, Tag, Shield } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import LayerDrawer from "../../components/LayerDrawer";
+import RelayerDrawer from "../../components/RelayerDrawer";
 
 export default function NftDetail() {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isLayerDrawerOpen, setIsLayerDrawerOpen] = useState(false);
+  const [isRelayerDrawerOpen, setIsRelayerDrawerOpen] = useState(false);
   
   // This would normally come from an API or props
   const nftData = {
@@ -113,14 +115,14 @@ export default function NftDetail() {
               </div>
             </div>
             <button 
-              onClick={() => setIsDrawerOpen(true)}
+              onClick={() => setIsLayerDrawerOpen(true)}
               className="w-full text-sm text-gray-600 hover:text-black flex items-center gap-2 justify-center mb-4 border py-2 rounded-lg hover:border-black transition-all"
             >
               View layer hierarchy →
             </button>
             <div className="flex gap-4">
               <button 
-                onClick={() => setIsDrawerOpen(true)}
+                onClick={() => setIsRelayerDrawerOpen(true)}
                 className="flex-1 bg-black text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-800 transition-colors flex flex-col items-center"
               >
                 <span>Relayer</span>
@@ -154,8 +156,12 @@ export default function NftDetail() {
       </div>
 
       <LayerDrawer 
-        isOpen={isDrawerOpen} 
-        onClose={() => setIsDrawerOpen(false)} 
+        isOpen={isLayerDrawerOpen} 
+        onClose={() => setIsLayerDrawerOpen(false)} 
+      />
+      <RelayerDrawer 
+        isOpen={isRelayerDrawerOpen} 
+        onClose={() => setIsRelayerDrawerOpen(false)} 
       />
     </div>
   );
