@@ -3,6 +3,14 @@ import NftCard from "@/components/NftCard";
 import { Search, Filter } from "lucide-react";
 
 export default function Market() {
+  const categories = [
+    { name: 'Art', count: '1.2K', selected: true },
+    { name: 'Gaming', count: '892' },
+    { name: 'Photography', count: '438' },
+    { name: 'Music', count: '672' },
+    { name: 'Video', count: '329' }
+  ];
+
   const marketplaceNfts = [
     {
       image: '/nft.jpg',
@@ -56,15 +64,32 @@ export default function Market() {
 
   return (
     <div className="max-w-7xl mx-auto px-4">
-      {/* Header Section */}
+      {/* Category Tags */}
       <motion.div 
-        className="mb-12"
+        className="flex flex-wrap gap-4 mt-8 mb-12"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h1 className="text-5xl font-black mb-4">Marketplace</h1>
-        <p className="text-xl text-gray-600">Discover, collect, and sell extraordinary NFTs</p>
+        {categories.map((category, index) => (
+          <motion.button
+            key={category.name}
+            className={`px-6 py-3 rounded-lg backdrop-blur-md border transition-all
+                     flex items-center gap-2
+                     ${category.selected 
+                       ? 'bg-indigo-600 text-white border-transparent shadow-lg shadow-indigo-500/30' 
+                       : 'bg-white/10 border-white/20 shadow-[0_8px_16px_rgb(0_0_0/0.08)] hover:bg-white/20'
+                     }`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 * index }}
+          >
+            <span className="font-medium">{category.name}</span>
+            <span className={`text-sm ${category.selected ? 'text-white/70' : 'text-gray-500'}`}>
+              ({category.count})
+            </span>
+          </motion.button>
+        ))}
       </motion.div>
 
       {/* Search and Filter Section */}
