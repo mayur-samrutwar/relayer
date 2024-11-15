@@ -87,16 +87,32 @@ body {
 
 @keyframes move-dots {
   from {
-    background-position: 0 0;
+    background-position: 10px 0;
   }
   to {
-    background-position: 100% 0;
+    background-position: 0 0;
+  }
+}
+
+@keyframes move-dots-vertical {
+  from {
+    background-position: 0 10px;
+  }
+  to {
+    background-position: 0 0;
   }
 }
 
 .animate-move-dots {
   background-image: linear-gradient(to right, #9ca3af 50%, transparent 50%);
-  background-size: 20px 2px;
+  background-size: 10px 2px;
   background-repeat: repeat-x;
-  animation: move-dots 1s linear infinite;
+  animation: move-dots 0.2s linear infinite;
+}
+
+.animate-move-dots-vertical {
+  background-image: linear-gradient(to bottom, #9ca3af 50%, transparent 50%);
+  background-size: 2px 10px;
+  background-repeat: repeat-y;
+  animation: move-dots-vertical 0.2s linear infinite;
 }
