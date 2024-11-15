@@ -1,6 +1,7 @@
 import Image from "next/image";
 import localFont from "next/font/local";
 import Navbar from "@/components/Navbar";
+import Hero from "@/components/Hero";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -16,6 +17,7 @@ const geistMono = localFont({
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
+      <Hero />
     </div>
   );
 }
