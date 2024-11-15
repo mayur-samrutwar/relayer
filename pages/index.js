@@ -15,8 +15,7 @@ const geistMono = localFont({
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen mx-8 mt-4">
-      <Navbar />
+    <div className="flex flex-col min-h-screen">
       
     </div>
   );
