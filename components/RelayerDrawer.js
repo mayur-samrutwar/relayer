@@ -53,13 +53,13 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
     { id: 6, image: '/nft6.png' },
     { id: 7, image: '/glasses/test.png' },
     { id: 8, image: '/glasses/glasses2.png' },
-    // { id: 9, image: '/glasses/glasses3.png' },
-    // { id: 10, image: '/glasses/glasses4.png' },
-    // { id: 11, image: '/glasses/glasses5.png' },
-    // { id: 12, image: '/glasses/glasses6.png' },
-    // { id: 13, image: '/glasses/glasses7.png' },
-    // { id: 14, image: '/glasses/glasses8.png' },
-    // { id: 15, image: '/glasses/glasses9.png' },
+    { id: 9, image: '/glasses/glasses3.png' },
+    { id: 10, image: '/glasses/glasses4.png' },
+    { id: 11, image: '/glasses/glasses5.png' },
+    { id: 12, image: '/glasses/glasses6.png' },
+    { id: 13, image: '/glasses/glasses7.png' },
+    { id: 14, image: '/glasses/glasses8.png' },
+    { id: 15, image: '/glasses/glasses9.png' },
     // { id: 16, image: '/glasses/glasses10.png' },
     // { id: 17, image: '/glasses/glasses11.png' },
     // { id: 18, image: '/glasses/glasses12.png' },
@@ -348,7 +348,7 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
 
         {/* Right Sidebar - Only show in initial state */}
         {!isLoading && !generatedImage && (
-          <div className="w-96 h-full border-l border-gray-200 p-6">
+          <div className="w-96 h-full border-l border-gray-200 p-6 flex flex-col overflow-visible">
             <div className="space-y-4 mt-12">
               <input
                 type="text"
@@ -360,24 +360,30 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
               </button>
             </div>
 
-            <div className="mt-8 grid grid-cols-2 gap-4">
-              {availableImages.map((nft) => (
-                <motion.div
-                  key={nft.id}
-                  drag
-                  dragMomentum={false}
-                  whileHover={{ scale: 1.05 }}
-                  whileDrag={{ scale: 1.1, zIndex: 50 }}
-                  onDragEnd={(_, info) => handleDragEnd(_, info, nft)}
-                  className="relative w-full aspect-square rounded-lg overflow-hidden cursor-move touch-none"
-                >
-                  <img
-                    src={nft.image}
-                    alt={`NFT ${nft.id}`}
-                    className="w-full h-full object-cover pointer-events-none"
-                  />
-                </motion.div>
-              ))}
+            <div className="mt-8 overflow-y-auto flex-1 overflow-x-visible">
+              <div className="grid grid-cols-2 gap-4 auto-rows-max">
+                {availableImages.map((nft) => (
+                  <motion.div
+                    key={nft.id}
+                    drag
+                    dragMomentum={false}
+                    whileHover={{ scale: 1.05 }}
+                    whileDrag={{ 
+                      scale: 1.1, 
+                      zIndex: 999
+                    }}
+                    onDragEnd={(_, info) => handleDragEnd(_, info, nft)}
+                    className="relative w-full aspect-square rounded-lg overflow-hidden cursor-move touch-none"
+                    style={{ touchAction: "none" }}
+                  >
+                    <img
+                      src={nft.image}
+                      alt={`NFT ${nft.id}`}
+                      className="w-full h-full object-cover pointer-events-none"
+                    />
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </div>
         )}
