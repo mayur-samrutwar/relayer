@@ -31,19 +31,19 @@ export default function Market() {
       remaining: '2/3'
     },
     {
-      image: '/nft.jpg',
+      image: '/nft4.png',
       creatorName: 'john',
       price: '0.3 ETH',
       remaining: '5/8'
     },
     {
-      image: '/nft2.jpg',
+      image: '/nft5.png',
       creatorName: 'emma',
       price: '2.1 ETH',
       remaining: '2/7'
     },
     {
-      image: '/nft3.jpg',
+      image: '/nft6.png',
       creatorName: 'lucas',
       price: '1.7 ETH',
       remaining: '4/6'
