@@ -214,12 +214,15 @@ export default function NftDetail() {
                 <p className="text-xl font-semibold">{nftData.remaining}</p>
               </div>
             </div>
-            <button 
-              onClick={() => setIsLayerDrawerOpen(true)}
-              className="w-full text-sm text-gray-600 hover:text-black flex items-center gap-2 justify-center mb-4 border py-2 rounded-lg hover:border-black transition-all"
-            >
-              View layer hierarchy →
-            </button>
+            {/* Only show layer hierarchy button if layer > 0 */}
+            {nftContractData.layer > 0n && (
+              <button 
+                onClick={() => setIsLayerDrawerOpen(true)}
+                className="w-full text-sm text-gray-600 hover:text-black flex items-center gap-2 justify-center mb-4 border py-2 rounded-lg hover:border-black transition-all"
+              >
+                View layer hierarchy →
+              </button>
+            )}
             <div className="flex gap-4">
               <button 
                 onClick={() => setIsRelayerDrawerOpen(true)}
