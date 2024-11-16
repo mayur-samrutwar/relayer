@@ -11,9 +11,9 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
     { id: 1, image: '/nft.jpg' },
     { id: 2, image: '/nft2.jpg' },
     { id: 3, image: '/nft3.jpg' },
-    { id: 4, image: '/nft.jpg' },
-    { id: 5, image: '/nft2.jpg' },
-    { id: 6, image: '/nft3.jpg' }
+    { id: 4, image: '/nft4.png' },
+    { id: 5, image: '/nft5.png' },
+    { id: 6, image: '/nft6.png' }
   ]);
 
   const handleDragEnd = (event, info, image) => {
