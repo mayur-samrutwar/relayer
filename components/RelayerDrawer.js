@@ -2,8 +2,10 @@ import { X } from "lucide-react";
 import { motion, useDragControls } from "framer-motion";
 import { useState } from "react";
 
-export default function RelayerDrawer({ isOpen, onClose }) {
-  const [leftCircleImage, setLeftCircleImage] = useState(null);
+export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
+  const [leftCircleImage, setLeftCircleImage] = useState(
+    initialImage ? { id: 'initial', image: initialImage } : null
+  );
   const [rightCircleImage, setRightCircleImage] = useState(null);
   const [availableImages, setAvailableImages] = useState([
     { id: 1, image: '/nft.jpg' },

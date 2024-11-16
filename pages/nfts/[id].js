@@ -161,7 +161,8 @@ export default function NftDetail() {
       />
       <RelayerDrawer 
         isOpen={isRelayerDrawerOpen} 
-        onClose={() => setIsRelayerDrawerOpen(false)} 
+        onClose={() => setIsRelayerDrawerOpen(false)}
+        initialImage={nftData.image}
       />
     </div>
   );
