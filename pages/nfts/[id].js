@@ -10,7 +10,6 @@ import RelayerDrawer from "../../components/RelayerDrawer";
 
 // Import your contract ABI and address
 import relayerABI from '../../contract/abi/relayer.json';
-const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
 export default function NftDetail() {
   const router = useRouter();
@@ -20,53 +19,72 @@ export default function NftDetail() {
   const [nftData, setNftData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Add console logs for initial values
-  console.log('Router ID:', id);
-  
-  const { data: contractData, isError: contractError } = useReadContract({
-    address: CONTRACT_ADDRESS,
+  // Get NFT data from contract
+  const { 
+    data: nftContractData, 
+    isLoading: isContractLoading,
+    isError: isContractError 
+  } = useReadContract({
+    address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_BASE,
     abi: relayerABI,
     functionName: 'getNFTData',
     args: id ? [BigInt(id)] : undefined,
     enabled: !!id,
   });
 
-  const { data: owner, isError: ownerError } = useReadContract({
-    address: CONTRACT_ADDRESS,
+  // Add console log to debug contract data
+  useEffect(() => {
+    console.log('Contract Data:', {
+      id,
+      nftContractData,
+      isContractLoading,
+      isContractError
+    });
+  }, [id, nftContractData, isContractLoading, isContractError]);
+
+  // Get owner data
+  const { 
+    data: owner,
+    isLoading: isOwnerLoading,
+    isError: isOwnerError 
+  } = useReadContract({
+    address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_BASE,
     abi: relayerABI,
     functionName: 'ownerOf',
     args: id ? [BigInt(id)] : undefined,
     enabled: !!id,
   });
 
-  const { data: uri, isError: uriError } = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi: relayerABI,
-    functionName: 'tokenURI',
-    args: id ? [BigInt(id)] : undefined,
-    enabled: !!id,
-  });
-
-  // Log contract data responses
-  console.log('Contract Data:', {
-    contractData,
-    owner,
-    uri,
-    errors: {
-      contractError,
-      ownerError,
-      uriError
-    }
-  });
-
   useEffect(() => {
     async function fetchMetadata() {
-      if (!contractData || !owner || !uri) return;
+      // Wait for contract data and owner to be loaded
+      if (isContractLoading || isOwnerLoading) return;
+      
+      // Handle errors
+      if (isContractError || isOwnerError) {
+        console.error('Error fetching contract data');
+        setLoading(false);
+        return;
+      }
+
+      // Check if we have the required data
+      if (!nftContractData || !owner) {
+        setLoading(false);
+        return;
+      }
       
       try {
-        // Fetch metadata from IPFS or your storage
-        const metadataResponse = await fetch(uri);
-        const metadata = await metadataResponse.json();
+        // Get attestationId from contract data instead of metadataId
+        const metadataId = nftContractData.attestationId;
+        
+        // Fetch metadata from MongoDB using metadataId
+        const dbResponse = await fetch(`/api/get-metadata?metadataId=${metadataId}`);
+        
+        if (!dbResponse.ok) {
+          throw new Error('Failed to fetch metadata');
+        }
+        
+        const metadata = await dbResponse.json();
 
         setNftData({
           id: id,
@@ -80,20 +98,20 @@ export default function NftDetail() {
           },
           owner: {
             address: owner,
-            name: 'Owner', // You might want to resolve ENS or get profile info
+            name: 'Owner',
             avatar: '/default-avatar.jpg',
             verified: true
           },
-          price: `${formatEther(contractData.price)} ETH`,
-          remaining: `${contractData.sharesAvailable}/1000`,
+          price: `${(nftContractData.price)} ETH`,
+          remaining: `${nftContractData.sharesAvailable}/${1000}`,
           collection: "Fractional Layer NFT",
           properties: metadata.attributes || [],
           details: [
-            { label: "Contract Address", value: CONTRACT_ADDRESS },
+            { label: "Contract Address", value: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_BASE },
             { label: "Token ID", value: id },
             { label: "Token Standard", value: "ERC-721" },
             { label: "Blockchain", value: "Ethereum" },
-            { label: "Layer", value: contractData.layer.toString() }
+            { label: "Layer", value: nftContractData.layer.toString() }
           ]
         });
       } catch (error) {
@@ -104,10 +122,21 @@ export default function NftDetail() {
     }
 
     fetchMetadata();
-  }, [contractData, owner, uri, id]);
+  }, [id, nftContractData, owner, isContractLoading, isOwnerLoading, isContractError, isOwnerError]);
 
+  // Show loading state while contract data is being fetched
+  if (isContractLoading || isOwnerLoading) {
+    return <div className="flex justify-center items-center min-h-screen">Loading contract data...</div>;
+  }
+
+  // Show error state if contract data fetch failed
+  if (isContractError || isOwnerError) {
+    return <div className="flex justify-center items-center min-h-screen">Error loading NFT data</div>;
+  }
+
+  // Show loading state while metadata is being fetched
   if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    return <div className="flex justify-center items-center min-h-screen">Loading metadata...</div>;
   }
 
   if (!nftData) {
