@@ -78,48 +78,79 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
       >
         {/* Left Section with Circles */}
         <div className="flex-1 flex items-center justify-center">
-          <div className="flex items-center space-x-4">
-            {/* Left Circle */}
-            <div id="left-circle" className="relative w-20 h-20 rounded-full bg-gray-200">
-              {leftCircleImage && (
-                <div className="relative w-full h-full">
-                  <img
-                    src={leftCircleImage.image}
-                    alt="Left Circle"
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                  <button
-                    onClick={() => handleRemoveImage(leftCircleImage, 'left')}
-                    className="absolute -top-2 -right-2 p-1 bg-white rounded-full shadow-lg hover:bg-gray-100"
-                  >
-                    <X size={12} />
-                  </button>
+          <div className="flex flex-col items-center space-y-12">
+            <div className="flex items-center space-x-8">
+              {/* Left Circle with Input */}
+              <div className="flex flex-col items-center space-y-4">
+                <div id="left-circle" className="relative w-32 h-32 rounded-full bg-gray-200">
+                  {leftCircleImage && (
+                    <div className="relative w-full h-full">
+                      <img
+                        src={leftCircleImage.image}
+                        alt="Left Circle"
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                      <button
+                        onClick={() => handleRemoveImage(leftCircleImage, 'left')}
+                        className="absolute -top-2 -right-2 p-1 bg-white rounded-full shadow-lg hover:bg-gray-100"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
+                {leftCircleImage && (
+                  <div className="flex flex-col items-center space-y-4">
+                    <input
+                      type="text"
+                      placeholder="0.0"
+                      className="w-28 px-3 py-2 text-center text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
+                    />
+                    <span className="text-sm text-gray-500">Available - 2,000</span>
+                  </div>
+                )}
+              </div>
+
+              <button className="w-12 h-12 flex items-center justify-center">
+                <span className="text-7xl text-gray-200">+</span>
+              </button>
+
+              {/* Right Circle with Input */}
+              <div className="flex flex-col items-center space-y-4">
+                <div id="right-circle" className="relative w-32 h-32 rounded-full bg-gray-200">
+                  {rightCircleImage && (
+                    <div className="relative w-full h-full">
+                      <img
+                        src={rightCircleImage.image}
+                        alt="Right Circle"
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                      <button
+                        onClick={() => handleRemoveImage(rightCircleImage, 'right')}
+                        className="absolute -top-2 -right-2 p-1 bg-white rounded-full shadow-lg hover:bg-gray-100"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {rightCircleImage && (
+                  <div className="flex flex-col items-center space-y-4">
+                    <input
+                      type="text"
+                      placeholder="0.0"
+                      className="w-28 px-3 py-2 text-center text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
+                    />
+                    <span className="text-sm text-gray-500">Available - 2,000</span>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <button className="w-12 h-12 flex items-center justify-center">
-              <span className="text-7xl text-gray-200">+</span>
+            {/* Relayer Button */}
+            <button className="px-6 py-2 text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              Relayer
             </button>
-
-            {/* Right Circle */}
-            <div id="right-circle" className="relative w-20 h-20 rounded-full bg-gray-200">
-              {rightCircleImage && (
-                <div className="relative w-full h-full">
-                  <img
-                    src={rightCircleImage.image}
-                    alt="Right Circle"
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                  <button
-                    onClick={() => handleRemoveImage(rightCircleImage, 'right')}
-                    className="absolute -top-2 -right-2 p-1 bg-white rounded-full shadow-lg hover:bg-gray-100"
-                  >
-                    <X size={12} />
-                  </button>
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
