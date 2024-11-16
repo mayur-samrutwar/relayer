@@ -50,7 +50,27 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
     { id: 3, image: '/nft3.jpg' },
     { id: 4, image: '/nft4.png' },
     { id: 5, image: '/nft5.png' },
-    { id: 6, image: '/nft6.png' }
+    { id: 6, image: '/nft6.png' },
+    // { id: 7, image: '/glasses/test.png' },
+    // { id: 8, image: '/glasses/glasses2.png' },
+    // { id: 9, image: '/glasses/glasses3.png' },
+    // { id: 10, image: '/glasses/glasses4.png' },
+    // { id: 11, image: '/glasses/glasses5.png' },
+    // { id: 12, image: '/glasses/glasses6.png' },
+    // { id: 13, image: '/glasses/glasses7.png' },
+    // { id: 14, image: '/glasses/glasses8.png' },
+    // { id: 15, image: '/glasses/glasses9.png' },
+    // { id: 16, image: '/glasses/glasses10.png' },
+    // { id: 17, image: '/glasses/glasses11.png' },
+    // { id: 18, image: '/glasses/glasses12.png' },
+    // { id: 19, image: '/glasses/glasses13.png' },
+    // { id: 20, image: '/glasses/glasses14.png' },
+    // { id: 21, image: '/glasses/glasses15.png' },
+    // { id: 22, image: '/glasses/glasses16.png' },
+    // { id: 23, image: '/glasses/glasses17.png' },
+    // { id: 24, image: '/glasses/glasses18.png' },
+    // { id: 25, image: '/glasses/glasses19.png' },
+    // { id: 26, image: '/glasses/glasses20.png' }
   ]);
   const [isRelayerMode, setIsRelayerMode] = useState(true);
   const [mintPrice, setMintPrice] = useState("");
