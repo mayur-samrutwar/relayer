@@ -1,8 +1,41 @@
 import { motion } from "framer-motion";
 import NftCard from "@/components/NftCard";
 import { Search, Filter } from "lucide-react";
+import { useReadContract } from "wagmi";
+import { useEffect, useState } from "react";
+import contractABI from "@/contract/abi/relayer.json";
 
 export default function Market() {
+  const [allNfts, setAllNfts] = useState([]);
+  
+  // Read NFTs from contract
+  const { data: contractNfts } = useReadContract({
+    address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_BASE,
+    abi: contractABI,
+    functionName: 'getAllNFTs',
+    watch: true,
+  });
+
+  useEffect(() => {
+    if (contractNfts) {
+      const [tokenIds, owners, tokenData] = contractNfts;
+      
+      // Transform contract data into NFT objects
+      const contractNftObjects = tokenIds.map((tokenId, index) => ({
+        image: '/nft5.png', // Default image - you may want to fetch this from IPFS/elsewhere
+        creatorName: owners[index].slice(0, 6) + '...' + owners[index].slice(-4),
+        price: `${tokenData[index].price.toString()} ETH`,
+        remaining: `${tokenData[index].sharesAvailable}/${1000}`, // Using INITIAL_SHARES constant
+        tokenId: tokenId.toString(),
+        layer: tokenData[index].layer.toString(),
+        // Add any other relevant data from tokenData
+      }));
+
+      // Combine with existing hardcoded NFTs
+      setAllNfts([...contractNftObjects, ...marketplaceNfts]);
+    }
+  }, [contractNfts]);
+
   const categories = [
     { name: 'Art', count: '1.2K', selected: true },
     { name: 'Gaming', count: '892' },
@@ -122,9 +155,9 @@ export default function Market() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.4 }}
       >
-        {marketplaceNfts.map((nft, index) => (
+        {allNfts.map((nft, index) => (
           <motion.div
-            key={index}
+            key={nft.tokenId || `static-${index}`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 * index }}

@@ -1,12 +1,12 @@
 import Link from 'next/link';
 
 export default function NftCard({ 
-  id = '1',
+  id = 'abc',
   image = '/nft.jpg',
   creatorAvatar = 'https://pbs.twimg.com/profile_images/1593304942210478080/TUYae5z7_400x400.jpg',
   creatorName = 'mayur',
   price = '0.5 ETH',
-  remaining = '9/10'
+  remaining = '900/1000'
 }) {
   return (
     <Link href={`/nfts/${id}`}>
