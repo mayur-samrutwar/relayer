@@ -1,4 +1,4 @@
-import { DynamicWidget } from '@dynamic-labs/sdk-react-core';
+
 import Image from 'next/image';
 import logo from '../public/logo.png';
 import Link from 'next/link';

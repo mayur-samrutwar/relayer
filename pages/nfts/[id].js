@@ -1,46 +1,118 @@
 import { motion } from "framer-motion";
-import { ArrowLeft, Heart, Share2, Clock, Tag, Shield } from "lucide-react";
+import { ArrowLeft, Heart, Share2 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from 'next/router';
+import { useReadContract } from 'wagmi';
+import { formatEther } from 'viem';
 import LayerDrawer from "../../components/LayerDrawer";
 import RelayerDrawer from "../../components/RelayerDrawer";
 
+// Import your contract ABI and address
+import relayerABI from '../../contract/abi/relayer.json';
+const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+
 export default function NftDetail() {
+  const router = useRouter();
+  const { id } = router.query;
   const [isLayerDrawerOpen, setIsLayerDrawerOpen] = useState(false);
   const [isRelayerDrawerOpen, setIsRelayerDrawerOpen] = useState(false);
+  const [nftData, setNftData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Add console logs for initial values
+  console.log('Router ID:', id);
   
-  const nftData = {
-    id: 1,
-    name: "Abstract Dimension #312",
-    image: "/nft5.png",
-    description: "A unique piece exploring the intersection of digital art and blockchain technology. This NFT represents a new dimension of creativity in the digital space.",
-    creator: {
-      name: "mayur",
-      avatar: "https://pbs.twimg.com/profile_images/1593304942210478080/TUYae5z7_400x400.jpg",
-      verified: true
-    },
-    owner: {
-      name: "alex",
-      avatar: "/nft2.jpg",
-      verified: true
-    },
-    price: "0.5 ETH",
-    remaining: "9/10",
-    collection: "Abstract Dimensions",
-    properties: [
-      { name: "Background", value: "Deep Space", rarity: "12%" },
-      { name: "Base", value: "Quantum", rarity: "8%" },
-      { name: "Eyes", value: "Cosmic", rarity: "15%" },
-      { name: "Outfit", value: "Digital Armor", rarity: "5%" }
-    ],
-    details: [
-      { label: "Contract Address", value: "0x1234...5678" },
-      { label: "Token ID", value: "#312" },
-      { label: "Token Standard", value: "ERC-1155" },
-      { label: "Blockchain", value: "Ethereum" },
-      { label: "Created", value: "Apr 15, 2024" }
-    ]
-  };
+  const { data: contractData, isError: contractError } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: relayerABI,
+    functionName: 'getNFTData',
+    args: id ? [BigInt(id)] : undefined,
+    enabled: !!id,
+  });
+
+  const { data: owner, isError: ownerError } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: relayerABI,
+    functionName: 'ownerOf',
+    args: id ? [BigInt(id)] : undefined,
+    enabled: !!id,
+  });
+
+  const { data: uri, isError: uriError } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: relayerABI,
+    functionName: 'tokenURI',
+    args: id ? [BigInt(id)] : undefined,
+    enabled: !!id,
+  });
+
+  // Log contract data responses
+  console.log('Contract Data:', {
+    contractData,
+    owner,
+    uri,
+    errors: {
+      contractError,
+      ownerError,
+      uriError
+    }
+  });
+
+  useEffect(() => {
+    async function fetchMetadata() {
+      if (!contractData || !owner || !uri) return;
+      
+      try {
+        // Fetch metadata from IPFS or your storage
+        const metadataResponse = await fetch(uri);
+        const metadata = await metadataResponse.json();
+
+        setNftData({
+          id: id,
+          name: metadata.name,
+          image: metadata.image,
+          description: metadata.description,
+          creator: {
+            name: metadata.creator?.name || 'Unknown',
+            avatar: metadata.creator?.avatar || '/default-avatar.jpg',
+            verified: true
+          },
+          owner: {
+            address: owner,
+            name: 'Owner', // You might want to resolve ENS or get profile info
+            avatar: '/default-avatar.jpg',
+            verified: true
+          },
+          price: `${formatEther(contractData.price)} ETH`,
+          remaining: `${contractData.sharesAvailable}/1000`,
+          collection: "Fractional Layer NFT",
+          properties: metadata.attributes || [],
+          details: [
+            { label: "Contract Address", value: CONTRACT_ADDRESS },
+            { label: "Token ID", value: id },
+            { label: "Token Standard", value: "ERC-721" },
+            { label: "Blockchain", value: "Ethereum" },
+            { label: "Layer", value: contractData.layer.toString() }
+          ]
+        });
+      } catch (error) {
+        console.error('Error fetching metadata:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchMetadata();
+  }, [contractData, owner, uri, id]);
+
+  if (loading) {
+    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+  }
+
+  if (!nftData) {
+    return <div className="flex justify-center items-center min-h-screen">NFT not found</div>;
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">

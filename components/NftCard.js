@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 export default function NftCard({ 
-  id = 'abc',
+  id,
   image = '/nft.jpg',
   creatorAvatar = 'https://pbs.twimg.com/profile_images/1593304942210478080/TUYae5z7_400x400.jpg',
   creatorName = 'mayur',

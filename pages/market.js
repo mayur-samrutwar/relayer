@@ -22,13 +22,13 @@ export default function Market() {
       
       // Transform contract data into NFT objects
       const contractNftObjects = tokenIds.map((tokenId, index) => ({
-        image: '/nft5.png', // Default image - you may want to fetch this from IPFS/elsewhere
+        id: tokenId.toString(),
+        image: '/nft5.png',
         creatorName: owners[index].slice(0, 6) + '...' + owners[index].slice(-4),
         price: `${tokenData[index].price.toString()} ETH`,
-        remaining: `${tokenData[index].sharesAvailable}/${1000}`, // Using INITIAL_SHARES constant
+        remaining: `${tokenData[index].sharesAvailable}/${1000}`,
         tokenId: tokenId.toString(),
         layer: tokenData[index].layer.toString(),
-        // Add any other relevant data from tokenData
       }));
 
       // Combine with existing hardcoded NFTs
@@ -46,6 +46,7 @@ export default function Market() {
 
   const marketplaceNfts = [
     {
+      id: '1',
       image: '/nft.jpg',
       creatorName: 'mayur',
       price: '0.5 ETH',
