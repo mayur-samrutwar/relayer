@@ -37,7 +37,7 @@ const generatedImageVariants = {
 };
 
 export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
-  const router = useRouter();
+    const router = useRouter();
   const [leftCircleImage, setLeftCircleImage] = useState(
     initialImage ? { id: 'initial', image: initialImage } : null
   );
