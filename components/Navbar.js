@@ -24,6 +24,9 @@ export default function Navbar() {
         <Link href="/market" className="text-lg text-gray-700 hover:text-gray-900">
           Marketplace
         </Link>
+        <Link href="/relayer" className="text-lg text-gray-700 hover:text-gray-900">
+          Relayer
+        </Link>
         <Link href="/profile" className="text-lg text-gray-700 hover:text-gray-900">
           Profile
         </Link>
