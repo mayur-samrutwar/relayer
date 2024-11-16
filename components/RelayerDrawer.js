@@ -1,7 +1,9 @@
 import { X, Loader2 } from "lucide-react";
 import { motion, useDragControls, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import { useReadContract } from 'wagmi';
+import relayerABI from '../contract/abi/relayer.json';
 
 // Add these variants for animations
 const overlayVariants = {
@@ -44,37 +46,56 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
   const [rightCircleImage, setRightCircleImage] = useState(null);
   const [generatedImage, setGeneratedImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [availableImages, setAvailableImages] = useState([
-    { id: 1, image: '/nft.jpg' },
-    { id: 2, image: '/nft2.jpg' },
-    { id: 3, image: '/nft3.jpg' },
-    { id: 4, image: '/nft4.png' },
-    { id: 5, image: '/nft5.png' },
-    { id: 6, image: '/nft6.png' },
-    { id: 7, image: '/glasses/test.png' },
-    { id: 8, image: '/glasses/glasses2.png' },
-    { id: 9, image: '/glasses/glasses3.png' },
-    { id: 10, image: '/glasses/glasses4.png' },
-    { id: 11, image: '/glasses/glasses5.png' },
-    { id: 12, image: '/glasses/glasses6.png' },
-    { id: 13, image: '/glasses/glasses7.png' },
-    { id: 14, image: '/glasses/glasses8.png' },
-    { id: 15, image: '/glasses/glasses9.png' },
-    // { id: 16, image: '/glasses/glasses10.png' },
-    // { id: 17, image: '/glasses/glasses11.png' },
-    // { id: 18, image: '/glasses/glasses12.png' },
-    // { id: 19, image: '/glasses/glasses13.png' },
-    // { id: 20, image: '/glasses/glasses14.png' },
-    // { id: 21, image: '/glasses/glasses15.png' },
-    // { id: 22, image: '/glasses/glasses16.png' },
-    // { id: 23, image: '/glasses/glasses17.png' },
-    // { id: 24, image: '/glasses/glasses18.png' },
-    // { id: 25, image: '/glasses/glasses19.png' },
-    // { id: 26, image: '/glasses/glasses20.png' }
-  ]);
+  const [availableImages, setAvailableImages] = useState([]);
+  const [isLoadingNFTs, setIsLoadingNFTs] = useState(true);
   const [isRelayerMode, setIsRelayerMode] = useState(true);
   const [mintPrice, setMintPrice] = useState("");
   const [shouldReset, setShouldReset] = useState(false);
+
+  // Get all NFTs from contract
+  const { data: contractNfts } = useReadContract({
+    address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_BASE,
+    abi: relayerABI,
+    functionName: 'getAllNFTs',
+    watch: true,
+  });
+
+  useEffect(() => {
+    async function fetchNFTsMetadata() {
+      if (!contractNfts) return;
+
+      try {
+        setIsLoadingNFTs(true);
+        const [tokenIds, owners, tokenData] = contractNfts;
+        
+        // Fetch metadata for each NFT
+        const nftPromises = tokenIds.map(async (tokenId, index) => {
+          const metadataId = tokenData[index].attestationId;
+          const response = await fetch(`/api/get-metadata?metadataId=${metadataId}`);
+          
+          if (!response.ok) {
+            throw new Error(`Failed to fetch metadata for token ${tokenId}`);
+          }
+          
+          const metadata = await response.json();
+          
+          return {
+            id: tokenId.toString(),
+            image: metadata.image,
+          };
+        });
+
+        const nfts = await Promise.all(nftPromises);
+        setAvailableImages(nfts);
+      } catch (error) {
+        console.error('Error fetching NFTs:', error);
+      } finally {
+        setIsLoadingNFTs(false);
+      }
+    }
+
+    fetchNFTsMetadata();
+  }, [contractNfts]);
 
   const handleDragEnd = (event, info, image) => {
     const leftCircle = document.getElementById('left-circle').getBoundingClientRect();
@@ -361,29 +382,40 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
             </div>
 
             <div className="mt-8 overflow-y-auto flex-1 overflow-x-visible">
-              <div className="grid grid-cols-2 gap-4 auto-rows-max">
-                {availableImages.map((nft) => (
-                  <motion.div
-                    key={nft.id}
-                    drag
-                    dragMomentum={false}
-                    whileHover={{ scale: 1.05 }}
-                    whileDrag={{ 
-                      scale: 1.1, 
-                      zIndex: 999
-                    }}
-                    onDragEnd={(_, info) => handleDragEnd(_, info, nft)}
-                    className="relative w-full aspect-square rounded-lg overflow-hidden cursor-move touch-none"
-                    style={{ touchAction: "none" }}
-                  >
-                    <img
-                      src={nft.image}
-                      alt={`NFT ${nft.id}`}
-                      className="w-full h-full object-cover pointer-events-none"
+              {isLoadingNFTs ? (
+                <div className="grid grid-cols-2 gap-4 auto-rows-max">
+                  {[...Array(6)].map((_, index) => (
+                    <div 
+                      key={index}
+                      className="aspect-square rounded-lg bg-gray-200 animate-pulse"
                     />
-                  </motion.div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-4 auto-rows-max">
+                  {availableImages.map((nft) => (
+                    <motion.div
+                      key={nft.id}
+                      drag
+                      dragMomentum={false}
+                      whileHover={{ scale: 1.05 }}
+                      whileDrag={{ 
+                        scale: 1.1, 
+                        zIndex: 999
+                      }}
+                      onDragEnd={(_, info) => handleDragEnd(_, info, nft)}
+                      className="relative w-full aspect-square rounded-lg overflow-hidden cursor-move touch-none"
+                      style={{ touchAction: "none" }}
+                    >
+                      <img
+                        src={nft.image}
+                        alt={`NFT ${nft.id}`}
+                        className="w-full h-full object-cover pointer-events-none"
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

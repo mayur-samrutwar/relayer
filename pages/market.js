@@ -17,23 +17,57 @@ export default function Market() {
   });
 
   useEffect(() => {
-    if (contractNfts) {
-      const [tokenIds, owners, tokenData] = contractNfts;
-      
-      // Transform contract data into NFT objects
-      const contractNftObjects = tokenIds.map((tokenId, index) => ({
-        id: tokenId.toString(),
-        image: '/nft5.png',
-        creatorName: owners[index].slice(0, 6) + '...' + owners[index].slice(-4),
-        price: `${tokenData[index].price.toString()} ETH`,
-        remaining: `${tokenData[index].sharesAvailable}/${1000}`,
-        tokenId: tokenId.toString(),
-        layer: tokenData[index].layer.toString(),
-      }));
+    async function fetchNFTsWithMetadata() {
+      if (contractNfts) {
+        const [tokenIds, owners, tokenData] = contractNfts;
+        
+        try {
+          // Fetch metadata for each NFT
+          const nftPromises = tokenIds.map(async (tokenId, index) => {
+            const metadataId = tokenData[index].attestationId;
+            
+            // Fetch metadata from MongoDB
+            const response = await fetch(`/api/get-metadata?metadataId=${metadataId}`);
+            
+            if (!response.ok) {
+              throw new Error(`Failed to fetch metadata for token ${tokenId}`);
+            }
+            
+            const metadata = await response.json();
+            
+            return {
+              id: tokenId.toString(),
+              image: metadata.image,
+              creatorName: owners[index].slice(0, 6) + '...' + owners[index].slice(-4),
+              price: `${tokenData[index].price.toString()} ETH`,
+              remaining: `${tokenData[index].sharesAvailable}/${1000}`,
+              tokenId: tokenId.toString(),
+              layer: tokenData[index].layer.toString(),
+            };
+          });
 
-      // Combine with existing hardcoded NFTs
-      setAllNfts([...contractNftObjects, ...marketplaceNfts]);
+          const contractNftObjects = await Promise.all(nftPromises);
+          
+          // Combine with existing hardcoded NFTs
+          setAllNfts([...contractNftObjects, ...marketplaceNfts]);
+        } catch (error) {
+          console.error('Error fetching NFT metadata:', error);
+          // In case of error, still show NFTs but with fallback image
+          const contractNftObjects = tokenIds.map((tokenId, index) => ({
+            id: tokenId.toString(),
+            image: '/nft5.png', // Fallback image
+            creatorName: owners[index].slice(0, 6) + '...' + owners[index].slice(-4),
+            price: `${tokenData[index].price.toString()} ETH`,
+            remaining: `${tokenData[index].sharesAvailable}/${1000}`,
+            tokenId: tokenId.toString(),
+            layer: tokenData[index].layer.toString(),
+          }));
+          setAllNfts([...contractNftObjects, ...marketplaceNfts]);
+        }
+      }
     }
+
+    fetchNFTsWithMetadata();
   }, [contractNfts]);
 
   const categories = [
