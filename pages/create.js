@@ -82,7 +82,7 @@ export default function CreateNFT() {
       }
 
       const { id } = await metadataResponse.json();
-      const attestationId = "placeholder-attestation-id";
+      const attestationId = id;
       const priceInEth = parseFloat(price);
 
       console.log("Minting started with tokenUri:", id);
