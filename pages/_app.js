@@ -1,18 +1,14 @@
 import "@/styles/globals.css";
 import Layout from "@/components/Layout";
-import { DynamicContextProvider } from '@dynamic-labs/sdk-react-core';
-import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
+import ContextProvider from '@/context';
 
-const App = ({ Component, pageProps }) => (
-  <DynamicContextProvider
-    settings={{
-      environmentId: '67dad32b-4c1c-4ac6-b429-957e30418be8',
-      walletConnectors: [EthereumWalletConnectors],
-    }}>
+const App = ({ Component, pageProps: { ...pageProps } }) => (
+
+  <ContextProvider>
     <Layout>
       <Component {...pageProps} />
     </Layout>
-  </DynamicContextProvider>
+    </ContextProvider>
 );
 
 export default App;

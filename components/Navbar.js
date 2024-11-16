@@ -31,7 +31,7 @@ export default function Navbar() {
           Profile
         </Link>
       </div>
-      <DynamicWidget />
+      <w3m-button label="Login" balance="hide" />
     </nav>
   );
 }

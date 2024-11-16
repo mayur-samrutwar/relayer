@@ -3,6 +3,8 @@ import { Upload, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { SignProtocolClient, SpMode, OffChainSignType } from "@ethsign/sp-sdk";
+import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import relayerABI from '../contract/abi/relayer.json';
 
 export default function CreateNFT() {
   const router = useRouter();
@@ -10,6 +12,15 @@ export default function CreateNFT() {
   const [image, setImage] = useState(initialImage || null);
   const [price, setPrice] = useState("");
   const [hasAttestation, setHasAttestation] = useState(false);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [uri, setUri] = useState("");
+
+  const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_BASE;
+  const { writeContract, data: hash } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash,
+  });
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -42,6 +53,32 @@ export default function CreateNFT() {
   };
 
   const isFromRelayer = Boolean(initialImage);
+
+  const handleCreateNFT = async () => {
+    if (!image || !price || !name) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      console.log("inside try");
+      const tokenUri = uri || "ipfs://placeholder-uri";
+      const attestationId = "placeholder-attestation-id";
+      const priceInEth = parseFloat(price);
+      console.log("minting started");
+      await writeContract({
+        address: CONTRACT_ADDRESS,
+        abi: relayerABI,
+        functionName: 'mintNFT',
+        args: [tokenUri, attestationId, priceInEth]
+      });
+      console.log("NFT minted");
+
+    } catch (error) {
+      console.error('Error minting NFT:', error);
+      alert('Failed to mint NFT. Please try again.');
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -116,6 +153,8 @@ export default function CreateNFT() {
               </label>
               <input
                 type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder="Enter NFT name"
               />
@@ -126,6 +165,8 @@ export default function CreateNFT() {
                 Description
               </label>
               <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 rows="4"
                 placeholder="Describe your NFT"
@@ -159,13 +200,14 @@ export default function CreateNFT() {
           )}
           
           <button 
+            onClick={handleCreateNFT}
+            disabled={isFromRelayer && !hasAttestation || isConfirming}
             className={`w-full bg-black text-white py-4 rounded-lg font-medium transition-colors
-              ${isFromRelayer && !hasAttestation 
+              ${(isFromRelayer && !hasAttestation) || isConfirming
                 ? 'opacity-50 cursor-not-allowed hover:bg-black' 
                 : 'hover:bg-gray-800'}`}
-            disabled={isFromRelayer && !hasAttestation}
           >
-            Create NFT
+            {isConfirming ? 'Creating NFT...' : 'Create NFT'}
           </button>
         </motion.div>
       </motion.div>

@@ -587,6 +587,61 @@
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "getAllNFTs",
+		"outputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "tokenIds",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "address[]",
+				"name": "owners",
+				"type": "address[]"
+			},
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "layer",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "metadataId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "attestationId",
+						"type": "string"
+					},
+					{
+						"internalType": "bool",
+						"name": "exists",
+						"type": "bool"
+					},
+					{
+						"internalType": "uint256",
+						"name": "price",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "sharesAvailable",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct FractionalLayerNFT.NFTData[]",
+				"name": "tokenData",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "uint256",
