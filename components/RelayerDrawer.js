@@ -7,6 +7,8 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
     initialImage ? { id: 'initial', image: initialImage } : null
   );
   const [rightCircleImage, setRightCircleImage] = useState(null);
+  const [generatedImage, setGeneratedImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [availableImages, setAvailableImages] = useState([
     { id: 1, image: '/nft.jpg' },
     { id: 2, image: '/nft2.jpg' },
@@ -53,6 +55,53 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
       setRightCircleImage(null);
       setAvailableImages(prev => [...prev, image]);
     }
+  };
+
+  const handleRelayerClick = async () => {
+    if (!leftCircleImage || !rightCircleImage) {
+      alert('Please select both images first');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const [baseImageData, modificationImageData] = await Promise.all([
+        getBase64FromUrl(leftCircleImage.image),
+        getBase64FromUrl(rightCircleImage.image)
+      ]);
+
+      const response = await fetch('/api/generate-nft', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          baseImage: baseImageData,
+          modificationImage: modificationImageData,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+      
+      setGeneratedImage(data.url);
+    } catch (error) {
+      console.error('Error generating image:', error);
+      alert('Failed to generate image. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getBase64FromUrl = async (url) => {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
   };
 
   if (!isOpen) return null;
@@ -148,9 +197,24 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
             </div>
 
             {/* Relayer Button */}
-            <button className="px-6 py-2 text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-              Relayer
+            <button 
+              onClick={handleRelayerClick}
+              disabled={!leftCircleImage || !rightCircleImage || isLoading}
+              className="px-6 py-2 text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? 'Generating...' : 'Relayer'}
             </button>
+
+            {/* Generated Image Display */}
+            {generatedImage && (
+              <div className="mt-8">
+                <img 
+                  src={generatedImage} 
+                  alt="Generated NFT" 
+                  className="w-full h-auto rounded-lg shadow-lg"
+                />
+              </div>
+            )}
           </div>
         </div>
 

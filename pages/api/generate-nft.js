@@ -27,13 +27,19 @@ export default async function handler(req, res) {
 
     // Analyze the base image
     const baseImageAnalysis = await openai.chat.completions.create({
-      model: "gpt-4-vision-preview",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "user",
           content: [
             { type: "text", text: "Describe this image focusing on the main subjects, their positions, and the overall composition. Be concise." },
-            { type: "image_url", image_url: baseImage }
+            {
+              type: "image_url",
+              image_url: {
+                url: baseImage,
+                detail: "low"
+              }
+            }
           ],
         }
       ],
@@ -42,13 +48,18 @@ export default async function handler(req, res) {
 
     // Analyze the modification image
     const modificationImageAnalysis = await openai.chat.completions.create({
-      model: "gpt-4-vision-preview",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "user",
           content: [
             { type: "text", text: "What are the key elements or features in this image that could be incorporated into another image? Focus on style, objects, or distinctive features." },
-            { type: "image_url", image_url: modificationImage }
+            {
+              type: "image_url",
+              image_url: {
+                url: modificationImage
+              }
+            }
           ],
         }
       ],
@@ -57,7 +68,7 @@ export default async function handler(req, res) {
 
     // Create an intelligent combination prompt
     const contextualPrompt = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
