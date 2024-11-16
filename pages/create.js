@@ -17,6 +17,11 @@ export default function CreateNFT() {
   const [description, setDescription] = useState("");
   const [uri, setUri] = useState("");
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [creatingNFT, setCreatingNFT] = useState({
+    metadata: false,
+    attestation: false,
+    minting: false
+  });
 
   const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_BASE;
   const { writeContract, data: hash } = useWriteContract();
@@ -64,6 +69,7 @@ export default function CreateNFT() {
     }
 
     try {
+      setCreatingNFT(prev => ({ ...prev, metadata: true }));
       const metadataResponse = await fetch('/api/save-metadata', {
         method: 'POST',
         headers: {
@@ -72,7 +78,7 @@ export default function CreateNFT() {
         body: JSON.stringify({
           name,
           description,
-          image: "https://img.freepik.com/free-photo/chinese-new-year-celebration-with-rabbit_23-2149895561.jpg",
+          image: "https://img.freepik.com/free-psd/3d-rendering-hat-travel-icon_23-2149389109.jpg",
           creator: address || "0x0000000000000000000000000000000000000000"
         }),
       });
@@ -82,11 +88,14 @@ export default function CreateNFT() {
       }
 
       const { id } = await metadataResponse.json();
+      setCreatingNFT(prev => ({ ...prev, metadata: false, attestation: true }));
+
       const attestationId = id;
       const priceInEth = parseFloat(price);
 
       console.log("Minting started with tokenUri:", id);
       
+      setCreatingNFT(prev => ({ ...prev, attestation: false, minting: true }));
       await writeContract({
         address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_BASE,
         abi: relayerABI,
@@ -97,6 +106,7 @@ export default function CreateNFT() {
     } catch (error) {
       console.error('Error creating NFT:', error);
       alert('Failed to create NFT. Please try again.');
+      setCreatingNFT({ metadata: false, attestation: false, minting: false });
     }
   };
 
@@ -232,13 +242,16 @@ export default function CreateNFT() {
               
               <button 
                 onClick={handleCreateNFT}
-                disabled={isFromRelayer && !hasAttestation || isConfirming}
+                disabled={isFromRelayer && !hasAttestation || isConfirming || Object.values(creatingNFT).some(Boolean)}
                 className={`w-full bg-black text-white py-4 rounded-xl font-medium transition-colors
-                  ${(isFromRelayer && !hasAttestation) || isConfirming
+                  ${(isFromRelayer && !hasAttestation) || isConfirming || Object.values(creatingNFT).some(Boolean)
                     ? 'opacity-50 cursor-not-allowed hover:bg-black' 
                     : 'hover:bg-gray-800'}`}
               >
-                {isConfirming ? 'Creating NFT...' : 'Create NFT'}
+                {creatingNFT.metadata ? 'Saving Metadata...' :
+                 creatingNFT.attestation ? 'Creating Attestation...' :
+                 creatingNFT.minting ? 'Minting NFT...' :
+                 isConfirming ? 'Creating NFT...' : 'Create NFT'}
               </button>
             </div>
           </motion.div>
