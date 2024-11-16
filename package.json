@@ -11,6 +11,7 @@
   "dependencies": {
     "@dynamic-labs/ethereum": "^3.6.2",
     "@dynamic-labs/sdk-react-core": "^3.6.2",
+    "@ethsign/sp-sdk": "^0.7.8",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "framer-motion": "^11.11.17",
