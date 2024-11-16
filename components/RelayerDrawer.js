@@ -1,6 +1,7 @@
 import { X, Loader2 } from "lucide-react";
 import { motion, useDragControls, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { useRouter } from "next/router";
 
 // Add these variants for animations
 const overlayVariants = {
@@ -36,6 +37,7 @@ const generatedImageVariants = {
 };
 
 export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
+  const router = useRouter();
   const [leftCircleImage, setLeftCircleImage] = useState(
     initialImage ? { id: 'initial', image: initialImage } : null
   );
@@ -52,6 +54,7 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
   ]);
   const [isRelayerMode, setIsRelayerMode] = useState(true);
   const [mintPrice, setMintPrice] = useState("");
+  const [shouldReset, setShouldReset] = useState(false);
 
   const handleDragEnd = (event, info, image) => {
     const leftCircle = document.getElementById('left-circle').getBoundingClientRect();
@@ -93,6 +96,7 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
   };
 
   const handleRelayerClick = async () => {
+    setShouldReset(false);
     if (!leftCircleImage || !rightCircleImage) {
       alert('Please select both images first');
       return;
@@ -147,6 +151,21 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
     });
   };
 
+  const handleTryAgain = () => {
+    setShouldReset(true);
+    setGeneratedImage(null);
+    setIsLoading(false);
+  };
+
+  const handleClose = () => {
+    onClose();
+    setTimeout(() => {
+      setGeneratedImage(null);
+      setIsLoading(false);
+      setShouldReset(true);
+    }, 200);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -156,7 +175,7 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
         initial="closed"
         animate="open"
         exit="closed"
-        onClick={onClose}
+        onClick={handleClose}
         className="fixed inset-0 bg-black z-40"
       />
       
@@ -169,7 +188,7 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
       >
         {/* Close button - Always visible */}
         <button 
-          onClick={onClose}
+          onClick={handleClose}
           className="absolute top-6 right-6 p-2 hover:bg-gray-100 rounded-full z-50"
         >
           <X size={24} />
@@ -281,23 +300,21 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
                     </div>
                     
                     <div className="w-full space-y-4">
-                      <div className="relative">
-                        <input
-                          type="number"
-                          value={mintPrice}
-                          onChange={(e) => setMintPrice(e.target.value)}
-                          placeholder="Enter price in ETH"
-                          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-                          ETH
-                        </span>
-                      </div>
+                      <button
+                        onClick={handleTryAgain}
+                        className="w-full py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+                      >
+                        Try Again
+                      </button>
                       
                       <button
-                        onClick={handleMint}
-                        disabled={!mintPrice}
-                        className="w-full py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => {
+                          router.push({
+                            pathname: '/create',
+                            query: { image: generatedImage }
+                          });
+                        }}
+                        className="w-full py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors"
                       >
                         Mint NFT
                       </button>
