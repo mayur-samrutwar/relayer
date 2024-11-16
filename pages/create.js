@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Upload, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/router";
+import { SignProtocolClient, SpMode, OffChainSignType } from "@ethsign/sp-sdk";
 
 export default function CreateNFT() {
   const router = useRouter();
@@ -22,14 +23,35 @@ export default function CreateNFT() {
   };
 
   const generateAttestation = async () => {
-    // Add your attestation logic here
-    setHasAttestation(true);
+    try {
+      const client = new SignProtocolClient(SpMode.OffChain, {
+        signType: OffChainSignType.EvmEip712
+      });
+
+      const id = await client.createAttestation({
+        schemaId: 'SPS_wonUJkm4O1OqeLATm28Lx',
+        data: { parents: ['parent1', 'parent2'] },
+        indexingValue: "4"
+      });
+
+      console.log('Attestation ID:', id.attestationId);
+      setHasAttestation(true);
+    } catch (error) {
+      console.error('Error creating attestation:', error);
+    }
   };
 
   const isFromRelayer = Boolean(initialImage);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
+      <button 
+        onClick={generateAttestation}
+        className="mb-4 bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700"
+      >
+        Test Attestation
+      </button>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
