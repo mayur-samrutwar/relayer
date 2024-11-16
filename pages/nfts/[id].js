@@ -9,11 +9,10 @@ export default function NftDetail() {
   const [isLayerDrawerOpen, setIsLayerDrawerOpen] = useState(false);
   const [isRelayerDrawerOpen, setIsRelayerDrawerOpen] = useState(false);
   
-  // This would normally come from an API or props
   const nftData = {
     id: 1,
     name: "Abstract Dimension #312",
-    image: "/nft.jpg",
+    image: "/nft5.png",
     description: "A unique piece exploring the intersection of digital art and blockchain technology. This NFT represents a new dimension of creativity in the digital space.",
     creator: {
       name: "mayur",
