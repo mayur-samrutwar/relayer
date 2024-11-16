@@ -96,8 +96,8 @@ export default function RelayerDrawer({ isOpen, onClose }) {
               )}
             </div>
 
-            <button className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-              <span className="text-3xl text-gray-400">+</span>
+            <button className="w-12 h-12 flex items-center justify-center">
+              <span className="text-7xl text-gray-200">+</span>
             </button>
 
             {/* Right Circle */}
@@ -137,7 +137,7 @@ export default function RelayerDrawer({ isOpen, onClose }) {
               placeholder="Search relayer..."
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <button className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors">
+            <button className="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-800 transition-colors">
               Import
             </button>
           </div>
