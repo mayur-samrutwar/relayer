@@ -41,7 +41,11 @@ const generatedImageVariants = {
 export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
     const router = useRouter();
   const [leftCircleImage, setLeftCircleImage] = useState(
-    initialImage ? { id: 'initial', image: initialImage } : null
+    initialImage ? { 
+      id: 'initial', 
+      image: initialImage,
+      maxTokens: "1000"
+    } : null
   );
   const [rightCircleImage, setRightCircleImage] = useState(null);
   const [generatedImage, setGeneratedImage] = useState(null);
@@ -51,6 +55,7 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
   const [isRelayerMode, setIsRelayerMode] = useState(true);
   const [mintPrice, setMintPrice] = useState("");
   const [shouldReset, setShouldReset] = useState(false);
+  const [tokenAvailability, setTokenAvailability] = useState({});
 
   // Get all NFTs from contract
   const { data: contractNfts } = useReadContract({
@@ -68,6 +73,15 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
         setIsLoadingNFTs(true);
         const [tokenIds, owners, tokenData] = contractNfts;
         
+        // Create availability mapping with just max tokens
+        const availability = {};
+        tokenData.forEach((data, index) => {
+          availability[tokenIds[index].toString()] = {
+            max: data.maxTokens?.toString() || "1000" // Default to 1000 if not specified
+          };
+        });
+        setTokenAvailability(availability);
+
         // Fetch metadata for each NFT
         const nftPromises = tokenIds.map(async (tokenId, index) => {
           const metadataId = tokenData[index].attestationId;
@@ -96,6 +110,15 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
 
     fetchNFTsMetadata();
   }, [contractNfts]);
+
+  useEffect(() => {
+    if (initialImage) {
+      setTokenAvailability(prev => ({
+        ...prev,
+        initial: { max: "1000" }
+      }));
+    }
+  }, [initialImage]);
 
   const handleDragEnd = (event, info, image) => {
     const leftCircle = document.getElementById('left-circle').getBoundingClientRect();
@@ -259,13 +282,20 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
                         </div>
                       )}
                     </div>
-                    {leftCircleImage && (
-                      <input
-                        type="text"
-                        placeholder="0.0"
-                        className="w-28 px-3 py-2 text-center text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
-                      />
-                    )}
+                    <div className="flex flex-col items-center space-y-2">
+                      {leftCircleImage && (
+                        <input
+                          type="text"
+                          placeholder="10"
+                          className="w-28 px-3 py-2 text-center text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
+                        />
+                      )}
+                      {leftCircleImage && tokenAvailability[leftCircleImage.id] && (
+                        <p className="text-sm text-gray-500">
+                          Max {tokenAvailability[leftCircleImage.id].max} shares
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   <span className="text-7xl text-gray-200">+</span>
@@ -289,13 +319,20 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
                         </div>
                       )}
                     </div>
-                    {rightCircleImage && (
-                      <input
-                        type="text"
-                        placeholder="0.0"
-                        className="w-28 px-3 py-2 text-center text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
-                      />
-                    )}
+                    <div className="flex flex-col items-center space-y-2">
+                      {rightCircleImage && (
+                        <input
+                          type="text"
+                          placeholder="20"
+                          className="w-28 px-3 py-2 text-center text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
+                        />
+                      )}
+                      {rightCircleImage && tokenAvailability[rightCircleImage.id] && (
+                        <p className="text-sm text-gray-500">
+                          Max {tokenAvailability[rightCircleImage.id].max} shares
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
 
