@@ -170,6 +170,7 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
     setIsLoading(true);
     
     try {
+      // Get base64 data for both images
       const [baseImageData, modificationImageData] = await Promise.all([
         getBase64FromUrl(leftCircleImage.image),
         getBase64FromUrl(rightCircleImage.image)
@@ -186,13 +187,16 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
         }),
       });
 
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate image');
+      }
+
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
-      
       setGeneratedImage(data.url);
     } catch (error) {
       console.error('Error generating image:', error);
-      alert('Failed to generate image. Please try again.');
+      alert(error.message || 'Failed to generate image. Please try again with supported image formats (PNG, JPEG, GIF, or WEBP).');
     } finally {
       setIsLoading(false);
     }
@@ -205,14 +209,70 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
   };
 
   const getBase64FromUrl = async (url) => {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      
+      // Add logging to debug the blob type
+      console.log('Blob type:', blob.type);
+
+      // Expand supported types to include more variations
+      const supportedTypes = [
+        'image/png', 
+        'image/jpeg', 
+        'image/jpg',
+        'image/gif', 
+        'image/webp',
+        'application/octet-stream' // Some images might come through as binary data
+      ];
+
+      // If blob type is empty or not recognized, try to infer from URL
+      let effectiveType = blob.type;
+      if (!effectiveType || !supportedTypes.includes(effectiveType)) {
+        const extension = url.split('.').pop()?.toLowerCase();
+        switch (extension) {
+          case 'png':
+            effectiveType = 'image/png';
+            break;
+          case 'jpg':
+          case 'jpeg':
+            effectiveType = 'image/jpeg';
+            break;
+          case 'gif':
+            effectiveType = 'image/gif';
+            break;
+          case 'webp':
+            effectiveType = 'image/webp';
+            break;
+        }
+      }
+
+      if (!supportedTypes.includes(effectiveType)) {
+        console.error('Unsupported image type:', effectiveType, 'URL:', url);
+        throw new Error('Unsupported image format. Please use PNG, JPEG, GIF, or WEBP.');
+      }
+
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          try {
+            const base64String = reader.result.toString();
+            const formattedBase64 = base64String.split(',')[1];
+            if (!formattedBase64) {
+              throw new Error('Failed to process image data');
+            }
+            resolve(formattedBase64);
+          } catch (error) {
+            reject(error);
+          }
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('Error processing image:', error);
+      throw new Error('Failed to process image. Please try again with a supported format.');
+    }
   };
 
   const handleTryAgain = () => {

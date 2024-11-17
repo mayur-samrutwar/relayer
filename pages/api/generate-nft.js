@@ -1,17 +1,8 @@
 import OpenAI from 'openai';
-import { NextResponse } from 'next/server';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-  },
-};
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -19,11 +10,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { baseImage, modificationImage } = req.body;
-
-    if (!baseImage || !modificationImage) {
-      return res.status(400).json({ error: 'Both base image and modification image are required' });
-    }
+    // Use temporary images from public folder with full URLs
+    const baseImageUrl = `https://i.ibb.co/G0JHwKM/nft5.png`;
+    const modificationImageUrl = `https://i.ibb.co/g7Kwf4z/nft4.png`;
 
     // Analyze the base image
     const baseImageAnalysis = await openai.chat.completions.create({
@@ -36,7 +25,7 @@ export default async function handler(req, res) {
             {
               type: "image_url",
               image_url: {
-                url: baseImage,
+                url: baseImageUrl,
                 detail: "low"
               }
             }
@@ -57,7 +46,8 @@ export default async function handler(req, res) {
             {
               type: "image_url",
               image_url: {
-                url: modificationImage
+                url: modificationImageUrl,
+                detail: "low"
               }
             }
           ],
@@ -100,6 +90,6 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Error:', error);
-    return res.status(500).json({ error: 'Failed to generate image' });
+    return res.status(500).json({ error: error.message || 'Failed to generate image' });
   }
 }
