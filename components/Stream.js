@@ -14,14 +14,14 @@ export default function Stream() {
         <div className="flex flex-col items-center">
           <div className="w-[8rem] h-[2px] translate-x-16 animate-move-dots transform rotate-180"></div>
           <div className="h-16 w-[2px] animate-move-dots-vertical "></div>
-          <div className="border p-4 rounded shadow z-10 bg-white">Parent 1</div>
+          <div className="border p-4 rounded shadow z-10 bg-white">0xfd...22B</div>
         </div>
 
         {/* Right path */}
         <div className="flex flex-col items-center">
           <div className="w-[8rem] h-[2px] -translate-x-16 animate-move-dots"></div>
           <div className="h-16 w-[2px] animate-move-dots-vertical"></div>
-          <div className="border p-4 rounded shadow z-10 bg-white">Parent 2</div>
+          <div className="border p-4 rounded shadow z-10 bg-white">0xvp...GY3</div>
         </div>
       </div>
     </div>
