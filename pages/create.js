@@ -30,6 +30,17 @@ export default function CreateNFT() {
   });
   const { address } = useAccount();
 
+  const [layerTransferData, setLayerTransferData] = useState({
+    nftId1: router.query.nftId1 || null,
+    nftId2: router.query.nftId2 || null,
+    shares1: router.query.shares1 || "",
+    shares2: router.query.shares2 || "",
+    price1: router.query.price1 || "0",
+    price2: router.query.price2 || "0",
+    layer1: router.query.layer1 || "0",
+    layer2: router.query.layer2 || "0"
+  });
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -63,7 +74,7 @@ export default function CreateNFT() {
   const isFromRelayer = Boolean(initialImage);
 
   const handleCreateNFT = async () => {
-    if (!image || !price || !name) {
+    if (!image || !price || !name || !layerTransferData.nftId1 || !layerTransferData.nftId2) {
       alert("Please fill in all required fields");
       return;
     }
@@ -78,8 +89,12 @@ export default function CreateNFT() {
         body: JSON.stringify({
           name,
           description,
-          image: "https://img.freepik.com/free-psd/3d-rendering-hat-travel-icon_23-2149389109.jpg",
-          creator: address || "0x0000000000000000000000000000000000000000"
+          image,
+          creator: address || "0x0000000000000000000000000000000000000000",
+          parentNFTs: {
+            nft1: layerTransferData.nftId1,
+            nft2: layerTransferData.nftId2
+          }
         }),
       });
 
@@ -87,20 +102,39 @@ export default function CreateNFT() {
         throw new Error('Failed to save metadata');
       }
 
-      const { id } = await metadataResponse.json();
+      const { id: metadataId } = await metadataResponse.json();
       setCreatingNFT(prev => ({ ...prev, metadata: false, attestation: true }));
 
-      const attestationId = id;
-      const priceInEth = parseFloat(price);
-
-      console.log("Minting started with tokenUri:", id);
+      const attestationId = await generateAttestation();
       
+      const newLayer = Math.max(
+        parseInt(layerTransferData.layer1),
+        parseInt(layerTransferData.layer2)
+      ) + 1;
+
+      const params = {
+        nftId1: layerTransferData.nftId1,
+        nftId2: layerTransferData.nftId2,
+        shares1: layerTransferData.shares1,
+        shares2: layerTransferData.shares2,
+        seller1: address,
+        seller2: address,
+        newLayer
+      };
+
       setCreatingNFT(prev => ({ ...prev, attestation: false, minting: true }));
+      
+      const totalCost = (
+        parseFloat(layerTransferData.price1) + 
+        parseFloat(layerTransferData.price2)
+      ) * 1e18;
+
       await writeContract({
-        address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_BASE,
+        address: CONTRACT_ADDRESS,
         abi: relayerABI,
-        functionName: 'mintNFT',
-        args: [id, attestationId, priceInEth]
+        functionName: 'layerTransfer',
+        args: [params, metadataId, price],
+        value: totalCost.toString()
       });
 
     } catch (error) {

@@ -42,7 +42,7 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
     const router = useRouter();
   const [leftCircleImage, setLeftCircleImage] = useState(
     initialImage ? { 
-      id: 'initial', 
+      id: 0, 
       image: initialImage,
       maxTokens: "1000"
     } : null
@@ -56,9 +56,14 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
   const [mintPrice, setMintPrice] = useState("");
   const [shouldReset, setShouldReset] = useState(false);
   const [tokenAvailability, setTokenAvailability] = useState({});
+  const [shareAmounts, setShareAmounts] = useState({
+    left: "",
+    right: ""
+  });
+  const [nftDataMap, setNftDataMap] = useState({});
 
   // Get all NFTs from contract
-  const { data: contractNfts } = useReadContract({
+  const { data: contractNfts, isLoading: isContractLoading } = useReadContract({
     address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS_BASE,
     abi: relayerABI,
     functionName: 'getAllNFTs',
@@ -66,49 +71,71 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
   });
 
   useEffect(() => {
-    async function fetchNFTsMetadata() {
+    async function fetchNFTsWithMetadata() {
       if (!contractNfts) return;
 
+      setIsLoadingNFTs(true);
+      
       try {
-        setIsLoadingNFTs(true);
         const [tokenIds, owners, tokenData] = contractNfts;
         
-        // Create availability mapping with just max tokens
+        // Create data maps first
+        const dataMap = {};
+        tokenIds.forEach((id, index) => {
+          dataMap[id.toString()] = {
+            price: tokenData[index].price?.toString() || "0",
+            layer: tokenData[index].layer?.toString() || "0",
+            maxTokens: tokenData[index].sharesAvailable?.toString() || "1000"
+          };
+        });
+        setNftDataMap(dataMap);
+
+        // Create availability mapping
         const availability = {};
         tokenData.forEach((data, index) => {
           availability[tokenIds[index].toString()] = {
-            max: data.maxTokens?.toString() || "1000" // Default to 1000 if not specified
+            max: data.sharesAvailable?.toString() || "1000"
           };
         });
         setTokenAvailability(availability);
 
         // Fetch metadata for each NFT
         const nftPromises = tokenIds.map(async (tokenId, index) => {
-          const metadataId = tokenData[index].attestationId;
-          const response = await fetch(`/api/get-metadata?metadataId=${metadataId}`);
-          
-          if (!response.ok) {
-            throw new Error(`Failed to fetch metadata for token ${tokenId}`);
+          try {
+            const metadataId = tokenData[index].attestationId;
+            const response = await fetch(`/api/get-metadata?metadataId=${metadataId}`);
+            
+            if (!response.ok) {
+              console.error(`Failed to fetch metadata for token ${tokenId}`);
+              return null;
+            }
+            
+            const metadata = await response.json();
+            
+            return {
+              id: tokenId.toString(),
+              image: metadata.image,
+            };
+          } catch (error) {
+            console.error(`Error fetching metadata for token ${tokenId}:`, error);
+            return {
+              id: tokenId.toString(),
+              image: '/nft5.png', // Fallback image
+            };
           }
-          
-          const metadata = await response.json();
-          
-          return {
-            id: tokenId.toString(),
-            image: metadata.image,
-          };
         });
 
-        const nfts = await Promise.all(nftPromises);
+        const nfts = (await Promise.all(nftPromises)).filter(nft => nft !== null);
+        console.log('Fetched NFTs:', nfts);
         setAvailableImages(nfts);
       } catch (error) {
-        console.error('Error fetching NFTs:', error);
+        console.error('Error processing NFT data:', error);
       } finally {
         setIsLoadingNFTs(false);
       }
     }
 
-    fetchNFTsMetadata();
+    fetchNFTsWithMetadata();
   }, [contractNfts]);
 
   useEffect(() => {
@@ -290,6 +317,28 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
     }, 200);
   };
 
+  const handleMintClick = () => {
+    if (!shareAmounts.left || !shareAmounts.right) {
+      alert("Please enter share amounts for both NFTs");
+      return;
+    }
+    
+    router.push({
+      pathname: '/create',
+      query: {
+        image: generatedImage,
+        nftId1: leftCircleImage.id,
+        nftId2: rightCircleImage.id,
+        shares1: shareAmounts.left,
+        shares2: shareAmounts.right,
+        price1: nftDataMap[leftCircleImage.id]?.price || "0",
+        price2: nftDataMap[rightCircleImage.id]?.price || "0",
+        layer1: nftDataMap[leftCircleImage.id]?.layer || "0",
+        layer2: nftDataMap[rightCircleImage.id]?.layer || "0"
+      }
+    });
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -346,6 +395,8 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
                       {leftCircleImage && (
                         <input
                           type="text"
+                          value={shareAmounts.left}
+                          onChange={(e) => setShareAmounts(prev => ({...prev, left: e.target.value}))}
                           placeholder="10"
                           className="w-28 px-3 py-2 text-center text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
                         />
@@ -383,6 +434,8 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
                       {rightCircleImage && (
                         <input
                           type="text"
+                          value={shareAmounts.right}
+                          onChange={(e) => setShareAmounts(prev => ({...prev, right: e.target.value}))}
                           placeholder="20"
                           className="w-28 px-3 py-2 text-center text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
                         />
@@ -446,12 +499,7 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
                       </button>
                       
                       <button
-                        onClick={() => {
-                          router.push({
-                            pathname: '/create',
-                            query: { image: generatedImage }
-                          });
-                        }}
+                        onClick={handleMintClick}
                         className="w-full py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors"
                       >
                         Mint NFT
@@ -479,7 +527,7 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
             </div>
 
             <div className="mt-8 overflow-y-auto flex-1 overflow-x-visible">
-              {isLoadingNFTs ? (
+              {isLoadingNFTs || isContractLoading ? (
                 <div className="grid grid-cols-2 gap-4 auto-rows-max">
                   {[...Array(6)].map((_, index) => (
                     <div 
@@ -488,7 +536,7 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
                     />
                   ))}
                 </div>
-              ) : (
+              ) : availableImages.length > 0 ? (
                 <div className="grid grid-cols-2 gap-4 auto-rows-max">
                   {availableImages.map((nft) => (
                     <motion.div
@@ -511,6 +559,10 @@ export default function RelayerDrawer({ isOpen, onClose, initialImage }) {
                       />
                     </motion.div>
                   ))}
+                </div>
+              ) : (
+                <div className="text-center text-gray-500 mt-8">
+                  No NFTs available
                 </div>
               )}
             </div>
